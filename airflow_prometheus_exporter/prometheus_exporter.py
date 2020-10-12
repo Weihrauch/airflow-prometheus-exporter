@@ -8,6 +8,7 @@ from airflow.configuration import conf
 from airflow.models import DagModel, DagRun, TaskInstance, TaskFail, XCom
 from airflow.plugins_manager import AirflowPlugin
 from airflow.settings import RBAC, Session
+from airflow.utils import timezone
 from airflow.utils.state import State
 from airflow.utils.log.logging_mixin import LoggingMixin
 from flask import Response
@@ -77,6 +78,7 @@ def get_dag_duration_info():
                 DagModel.is_paused == False,
                 DagRun.state == State.SUCCESS,
                 DagRun.end_date.isnot(None),
+                DagRun.end_date >= (timezone.utcnow() - timedelta(minutes=5))
             )
             .group_by(DagRun.dag_id)
             .subquery()
@@ -290,6 +292,7 @@ def get_task_duration_info():
                 DagModel.is_paused == False,
                 DagRun.state == State.SUCCESS,
                 DagRun.end_date.isnot(None),
+                DagRun.end_date >= (timezone.utcnow() - timedelta(minutes=5))
             )
             .group_by(DagRun.dag_id)
             .subquery()
